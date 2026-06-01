@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Renewing</title>
+    <!-- Sparkle Logo Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 0L60 30L90 40L60 50L50 80L40 50L10 40L40 30Z' fill='%230f766e'/></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fafaf9; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        // --- ⚙️ CONFIGURATION: Paste your Google Form details here ---
+        const googleFormActionUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfCs-OeX_8bXAcZrGgUxe1xNrtGfBqQDig19HbADFuLIK6KXw/formResponse"; 
+        const nameEntryId = "entry.1180825318";
+        const emailEntryId = "entry.471842347";
+
+        const { useState } = React;
+
+        // --- 🧠 UPGRADED WISDOM ENGINE ---
+        const extractWisdom = (text) => {
+            const t = text.toLowerCase();
+            const wisdomLibrary = [
+                { cat: "betrayal", kw: ['betray', 'cheat', 'divorce', 'lied to', 'broken heart', 'abandon', 'used me'], encour: "The pain of betrayal cuts deep, but God intimately knows this exact pain. When others break your trust, God remains the one who will never leave you.", verse: { ref: "Psalm 147:3", txt: "He heals the brokenhearted and binds up their wounds." } },
+                { cat: "insecurity", kw: ['ugly', 'stupid', 'hate myself', 'failure', 'loser', 'insecure'], encour: "The world wants you to hate the masterpiece God made. You are not defined by your inner critic; you are defined by the Creator who crafted you.", verse: { ref: "Psalm 139:14", txt: "I praise you because I am fearfully and wonderfully made." } },
+                { cat: "illness", kw: ['sick', 'cancer', 'chronic', 'illness', 'disease', 'hospital', 'pain'], encour: "Physical suffering is an incredibly heavy cross. Even when your body is failing, God promises to sustain your spirit and remain your ultimate strength.", verse: { ref: "2 Corinthians 4:16", txt: "Though outwardly we are wasting away, yet inwardly we are being renewed day by day." } },
+                { cat: "apathy", kw: ['numb', 'don\'t care', 'empty', 'feel nothing', 'apathy', 'hollow'], encour: "It is terrifying to feel empty, but God does not require you to manufacture emotions. Bring Him your numbness and ask Him to gently breathe life into your spirit.", verse: { ref: "Ezekiel 36:26", txt: "I will give you a new heart and put a new spirit in you." } },
+                { cat: "impatience", kw: ['waiting', 'taking too long', 'when will', 'unanswered prayer', 'why god'], encour: "Waiting in the silence is exhausting. It feels like God is ignoring you, but He is actively at work in the waiting. Trust His perfect timing.", verse: { ref: "Psalm 27:14", txt: "Wait for the Lord; be strong and take heart and wait for the Lord." } },
+                { cat: "jealousy", kw: ['jealous', 'envy', 'unfair', 'why do they', 'compared'], encour: "Comparison will hollow out your joy. God has written a specific, beautiful story for your life that cannot be measured against anyone else's.", verse: { ref: "Proverbs 14:30", txt: "A heart at peace gives life to the body, but envy rots the bones." } },
+                { cat: "confusion", kw: ['lost', 'confused', 'don\'t know', 'crossroads', 'decision', 'stuck'], encour: "You don't need to have the next ten years figured out. God promises to guide you generously if you simply ask Him for wisdom for the next step.", verse: { ref: "James 1:5", txt: "If any of you lacks wisdom, you should ask God, who gives generously to all." } },
+                { cat: "panic", kw: ['panic', 'overwhelm', 'racing', 'dread', 'can\'t breathe', 'spiraling'], encour: "In the middle of a panic, everything feels out of control. Breathe deeply. The Creator of the universe is sitting with you in this exact room, holding you steady.", verse: { ref: "Psalm 94:19", txt: "When anxiety was great within me, your consolation brought me joy." } },
+                { cat: "anxiety", kw: ['anxi', 'stress', 'worry', 'nervous', 'pressure', 'too much'], encour: "God sees the heavy burden of 'what-ifs' you are carrying. He invites you to cast this weight entirely onto Him, because He cares deeply for you.", verse: { ref: "1 Peter 5:7", txt: "Cast all your anxiety on him because he cares for you." } },
+                { cat: "anger", kw: ['mad', 'ang', 'furious', 'rage', 'hate them', 'revenge', 'livid'], encour: "It is okay to feel angry, but do not let it poison your spirit. God invites you to bring this raw anger to Him, asking Him to bring true justice and soften your heart.", verse: { ref: "Ephesians 4:26", txt: "In your anger do not sin: Do not let the sun go down while you are still angry." } },
+                { cat: "bitterness", kw: ['forgive', 'bitter', 'resent', 'grudge', 'holding on'], encour: "Holding onto this hurt feels like protection, but it's actually a cage. God offers you the strength to release them, just as He has forgiven you.", verse: { ref: "Ephesians 4:32", txt: "Be kind and compassionate to one another, forgiving each other, just as in Christ God forgave you." } },
+                { cat: "grief", kw: ['grief', 'loss', 'died', 'miss', 'passed away', 'widow', 'mourn'], encour: "God does not ask you to hide your tears or rush your healing. He is intimately, physically close to you in this crushing heartbreak.", verse: { ref: "Psalm 34:18", txt: "The Lord is close to the brokenhearted and saves those who are crushed in spirit." } },
+                { cat: "exhaustion", kw: ['exhausted', 'tired', 'burnout', 'fatigue', 'weary', 'drained', 'empty'], encour: "You are running on empty and striving too hard. Jesus invites you to drop the heavy yoke of performance and simply rest in His presence.", verse: { ref: "Matthew 11:28", txt: "Come to me, all you who are weary and burdened, and I will give you rest." } },
+                { cat: "guilt", kw: ['shame', 'guilt', 'mess up', 'fault', 'unforgivable', 'regret'], encour: "Do not let shame keep you hiding in the shadows. When we confess our mess to Him, God doesn't shame us—He cleanses us.", verse: { ref: "1 John 1:9", txt: "If we confess our sins, he is faithful and just and will forgive us." } },
+                { cat: "loneliness", kw: ['lonel', 'alone', 'isolat', 'no friends', 'no one cares'], encour: "Even when you feel entirely unseen by the world, you are intimately known, fiercely protected, and deeply loved by your Creator.", verse: { ref: "Deuteronomy 31:8", txt: "The Lord himself goes before you and will be with you; he will never leave you." } },
+                { cat: "financial", kw: ['money', 'bill', 'debt', 'job', 'fired', 'broke'], encour: "The anxiety of providing is heavy, but God sees your practical, earthly needs. He promises to be your ultimate provider in His perfect timing.", verse: { ref: "Philippians 4:19", txt: "And my God will meet all your needs according to the riches of his glory." } },
+                { cat: "future", kw: ['future', 'scared', 'fear', 'unknown', 'tomorrow'], encour: "The unknown can be terrifying, but God is already standing in your tomorrow. You do not have to walk into the future alone.", verse: { ref: "Joshua 1:9", txt: "Be strong and courageous. Do not be afraid... for the Lord your God will be with you wherever you go." } },
+                { cat: "depression", kw: ['depress', 'hopeless', 'sad', 'dark', 'heavy', 'crying'], encour: "In this heavy, suffocating darkness, God promises to be near. You don't have to have the strength right now; let Him carry you until the light returns.", verse: { ref: "Lamentations 3:22", txt: "Because of the Lord’s great love we are not consumed, for his compassions never fail." } }
+            ];
+
+            const match = wisdomLibrary.find(item => item.kw.some(k => t.includes(k)));
+            return match ? { encour: match.encour, verse: match.verse } : { 
+                encour: "God sees your heart in this moment. Even when words fail, He provides a peace that transcends understanding.", 
+                verse: { ref: "John 14:27", txt: "Peace I leave with you; my peace I give you. Do not let your hearts be troubled." } 
+            };
+        };
+
+        const LandingPage = ({ onUnlock }) => {
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                fetch(googleFormActionUrl, { method: 'POST', body: formData, mode: 'no-cors' });
+                onUnlock(e.target.elements.name.value);
+            };
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-stone-100">
+                        <h1 className="text-3xl font-bold text-emerald-900 mb-2">The Renewing</h1>
+                        <p className="text-stone-600 mb-6 italic">"Be transformed by the renewing of your mind."</p>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <input name={nameEntryId} required placeholder="First Name" className="w-full p-3 border rounded-xl" />
+                            <input name={emailEntryId} type="email" required placeholder="Email Address" className="w-full p-3 border rounded-xl" />
+                            <button className="w-full bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800">Access Journal Now</button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [unlocked, setUnlocked] = useState(!!localStorage.getItem('renewing_unlocked'));
+            const [name, setName] = useState(localStorage.getItem('renewing_name') || "");
+            const [entries, setEntries] = useState(JSON.parse(localStorage.getItem('renewing_entries') || '[]'));
+            const [inputText, setInputText] = useState("");
+
+            const handleUnlock = (n) => {
+                localStorage.setItem('renewing_unlocked', 'true');
+                localStorage.setItem('renewing_name', n);
+                setName(n);
+                setUnlocked(true);
+            };
+
+            const saveEntry = () => {
+                if (!inputText.trim()) return;
+                const wisdom = extractWisdom(inputText);
+                const newEntry = { id: Date.now(), text: inputText, ...wisdom, date: new Date().toLocaleDateString() };
+                const updated = [newEntry, ...entries];
+                setEntries(updated);
+                localStorage.setItem('renewing_entries', JSON.stringify(updated));
+                setInputText("");
+            };
+
+            if (!unlocked) return <LandingPage onUnlock={handleUnlock} />;
+
+            return (
+                <div className="max-w-2xl mx-auto px-4 py-8">
+                    <header className="flex justify-between items-center mb-8">
+                        <h1 className="text-2xl font-bold text-emerald-900">{name}'s Journey</h1>
+                        <span className="text-[10px] bg-stone-200 px-2 py-1 rounded-full font-bold uppercase tracking-widest text-stone-600">Private & Local</span>
+                    </header>
+
+                    <textarea className="w-full p-4 border rounded-2xl mb-4 h-32 focus:ring-2 focus:ring-emerald-500" placeholder="Cast your cares..." value={inputText} onChange={(e) => setInputText(e.target.value)} />
+                    <button onClick={saveEntry} className="w-full bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800 transition">Reflect & Renew</button>
+
+                    <div className="mt-10 space-y-6">
+                        {entries.map(e => (
+                            <div key={e.id} className="bg-white p-6 rounded-3xl shadow-sm border border-stone-100">
+                                <div className="mb-4">
+                                    <h4 className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">The Burden</h4>
+                                    <p className="text-stone-500 italic">"{e.text}"</p>
+                                </div>
+                                <div className="bg-emerald-50 p-6 rounded-2xl border-l-4 border-emerald-500">
+                                    <h4 className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-2">The Truth</h4>
+                                    <p className="text-emerald-900 mb-2 font-medium">{e.encouragement}</p>
+                                    <p className="text-emerald-700 font-bold italic">"{e.verse.txt}" — {e.verse.ref}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
+```eof
