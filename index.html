@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Renewing</title>
+    
+    <!-- Custom Sparkle Logo Icon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configure Tailwind for Dark Mode -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f766e', // Hunter Green
+                            light: '#FAFAF9', // Off-White
+                            sage: '#ccfbf1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { 
+            background-color: #FAFAF9; 
+            -webkit-tap-highlight-color: transparent; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        html.dark body {
+            background-color: #0f766e; /* Hunter Green */
+        }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        textarea, input { font-size: 16px !important; } 
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Smooth transitions for theme switching */
+        * { transition-property: background-color, border-color, color, fill, stroke; transition-duration: 300ms; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Custom SVG Icons
+        const Icon = ({ path, className="w-5 h-5", ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{path}</svg>
+        );
+        const Sparkles = (p) => <Icon {...p} path={<><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></>} />;
+        const Wind = (p) => <Icon {...p} path={<><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></>} />;
+        const Mic = (p) => <Icon {...p} path={<><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></>} />;
+        const MicOff = (p) => <Icon {...p} path={<><line x1="2" x2="22" y1="2" y2="22"/><path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2"/><path d="M5 10v2a7 7 0 0 0 12 5"/><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12"/><line x1="12" x2="12" y1="19" y2="22"/></>} />;
+        const BookOpen = (p) => <Icon {...p} path={<><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>} />;
+        const Edit2 = (p) => <Icon {...p} path={<><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></>} />;
+        const Trash2 = (p) => <Icon {...p} path={<><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></>} />;
+        const Heart = (p) => <Icon {...p} path={<><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></>} />;
+        const ExternalLink = (p) => <Icon {...p} path={<><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></>} />;
+        const ShieldCheck = (p) => <Icon {...p} path={<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></>} />;
+        const Loader2 = (p) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`spin ${p.className}`}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>;
+        const Lock = (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></>} />;
+        const Sun = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></>} />;
+        const Moon = (p) => <Icon {...p} path={<><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></>} />;
+
+        const { useState, useEffect, useRef } = React;
+
+        // --- THEME MANAGEMENT ---
+        function useTheme() {
+            const [theme, setTheme] = useState(() => {
+                const stored = localStorage.getItem('renewing-theme');
+                if (stored) return stored;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            });
+
+            useEffect(() => {
+                const root = window.document.documentElement;
+                if (theme === 'dark') {
+                    root.classList.add('dark');
+                } else {
+                    root.classList.remove('dark');
+                }
+                localStorage.setItem('renewing-theme', theme);
+            }, [theme]);
+
+            const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+            return { theme, toggleTheme };
+        }
+
+        const ThemeToggle = ({ theme, toggleTheme }) => (
+            <button 
+                onClick={toggleTheme} 
+                className="p-2 text-stone-400 hover:text-teal-600 dark:text-brand-sage dark:hover:text-white bg-stone-100 dark:bg-[#0b534d] rounded-full transition-all border border-stone-200/50 dark:border-teal-700/50 flex-shrink-0"
+                aria-label="Toggle Dark Mode"
+            >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+        );
+
+        // --- 🧠 UPGRADED WISDOM ENGINE ---
+        const extractKeywordLocally = (text) => {
+            const t = text.toLowerCase();
+            const wisdomLibrary = [
+                // SITUATIONAL: PARENTING & FAMILY
+                { cat: "parenting", kw: ['kids', 'child', 'son', 'daughter', 'toddler', 'teen', 'parenting', 'mom', 'dad', 'mother', 'father', 'yelling', 'failing my kids'], encour: "The weight of raising another human is incredibly heavy, and God sees how hard you are trying. His grace fills the gaps of your imperfections as a parent.", verse: { ref: "Isaiah 40:11", txt: "He tends his flock like a shepherd: He gathers the lambs in his arms and carries them close to his heart." } },
+                // SITUATIONAL: WORK & CAREER
+                { cat: "work", kw: ['work', 'boss', 'job', 'career', 'coworker', 'laid off', 'interview', 'promotion', 'business', 'office', 'overwhelmed at work'], encour: "Your worth is not defined by your productivity, your title, or your output. Take a breath and remember that you ultimately work for a Creator who rests.", verse: { ref: "Colossians 3:23", txt: "Whatever you do, work at it with all your heart, as working for the Lord, not for human masters." } },
+                // SITUATIONAL: MARRIAGE & CONFLICT
+                { cat: "conflict", kw: ['husband', 'wife', 'spouse', 'marriage', 'fight', 'arguing', 'argument', 'in-laws', 'relationship', 'ignored', 'misunderstood'], encour: "Navigating conflict with those closest to us can leave us feeling entirely drained and unseen. Ask God to guard your words and soften both of your hearts.", verse: { ref: "Ephesians 4:2-3", txt: "Be completely humble and gentle; be patient, bearing with one another in love." } },
+                // SITUATIONAL: FAILURE & MISTAKES
+                { cat: "failure", kw: ['messed up', 'failed', 'my fault', 'ruined', 'mistake', 'stupid', 'screwed up'], encour: "The enemy wants you to sit in the shame of your mistake, but God's mercies are not limited by your failures. You are allowed to start over right now.", verse: { ref: "Lamentations 3:22-23", txt: "Because of the Lord’s great love we are not consumed, for his compassions never fail. They are new every morning." } },
+                // SITUATIONAL: TEMPTATION & ADDICTION
+                { cat: "temptation", kw: ['temptation', 'relapse', 'addiction', 'porn', 'drink', 'habit', 'can\'t stop', 'lust'], encour: "Shame tells you to hide in the dark, but God's grace invites you into the light. He provides a way out, and He does not condemn you for struggling.", verse: { ref: "1 Corinthians 10:13", txt: "And God is faithful; he will not let you be tempted beyond what you can bear. But when you are tempted, he will also provide a way out." } },
+                // SITUATIONAL: INJUSTICE & UNFAIRNESS
+                { cat: "injustice", kw: ['unfair', 'lied about', 'gossip', 'rumor', 'passed over', 'stolen', 'cheated me', 'wronged'], encour: "When you are wronged, the desire to defend yourself and seek revenge is overwhelming. God asks you to step back and let Him be your defender and your justice.", verse: { ref: "Psalm 37:5-6", txt: "Commit your way to the Lord; trust in him and he will do this: He will make your righteous reward shine like the dawn." } },
+                
+                // EMOTIONAL & EXPANDED SITUATIONAL CATEGORIES
+                { cat: "betrayal", kw: ['betray', 'cheat', 'divorce', 'lied to', 'broken heart', 'abandon', 'used me', 'affair', 'walked out'], encour: "The pain of betrayal cuts deep, but God intimately knows this exact pain. When others break your trust, God remains the one who will never leave you.", verse: { ref: "Psalm 147:3", txt: "He heals the brokenhearted and binds up their wounds." } },
+                { cat: "insecurity", kw: ['ugly', 'hate myself', 'loser', 'insecure', 'imposter', 'not good enough', 'body image', 'weight', 'fat'], encour: "The world wants you to hate the masterpiece God made. You are not defined by your inner critic; you are defined by the Creator who crafted you.", verse: { ref: "Psalm 139:14", txt: "I praise you because I am fearfully and wonderfully made." } },
+                { cat: "illness", kw: ['sick', 'cancer', 'chronic', 'illness', 'disease', 'hospital', 'pain', 'doctor', 'diagnosis', 'test results', 'surgery'], encour: "Physical suffering is an incredibly heavy cross. Even when your body is failing, God promises to sustain your spirit and remain your ultimate strength.", verse: { ref: "2 Corinthians 4:16", txt: "Though outwardly we are wasting away, yet inwardly we are being renewed day by day." } },
+                { cat: "apathy", kw: ['numb', 'don\'t care', 'empty', 'feel nothing', 'apathy', 'hollow'], encour: "It is terrifying to feel empty, but God does not require you to manufacture emotions. Bring Him your numbness and ask Him to gently breathe life into your spirit.", verse: { ref: "Ezekiel 36:26", txt: "I will give you a new heart and put a new spirit in you." } },
+                { cat: "impatience", kw: ['waiting', 'taking too long', 'when will', 'unanswered prayer', 'why god', 'timing'], encour: "Waiting in the silence is exhausting. It feels like God is ignoring you, but He is actively at work in the waiting. Trust His perfect timing.", verse: { ref: "Psalm 27:14", txt: "Wait for the Lord; be strong and take heart and wait for the Lord." } },
+                { cat: "jealousy", kw: ['jealous', 'envy', 'why do they', 'compared', 'comparison'], encour: "Comparison will hollow out your joy. God has written a specific, beautiful story for your life that cannot be measured against anyone else's.", verse: { ref: "Proverbs 14:30", txt: "A heart at peace gives life to the body, but envy rots the bones." } },
+                { cat: "confusion", kw: ['lost', 'confused', 'don\'t know', 'crossroads', 'decision', 'stuck', 'which path', 'what do i do'], encour: "You don't need to have the next ten years figured out. God promises to guide you generously if you simply ask Him for wisdom for the next step.", verse: { ref: "James 1:5", txt: "If any of you lacks wisdom, you should ask God, who gives generously to all." } },
+                { cat: "panic", kw: ['panic', 'racing', 'dread', 'can\'t breathe', 'spiraling', 'panic attack'], encour: "In the middle of a panic, everything feels out of control. Breathe deeply. The Creator of the universe is sitting with you in this exact room, holding you steady.", verse: { ref: "Psalm 94:19", txt: "When anxiety was great within me, your consolation brought me joy." } },
+                { cat: "anxiety", kw: ['anxi', 'stress', 'worry', 'nervous', 'pressure', 'too much', 'overwhelmed', 'drowning', 'plate is full', 'busy'], encour: "God sees the heavy burden of 'what-ifs' and endless tasks you are carrying. He invites you to cast this weight entirely onto Him, because He cares deeply for you.", verse: { ref: "1 Peter 5:7", txt: "Cast all your anxiety on him because he cares for you." } },
+                { cat: "anger", kw: ['mad', 'ang', 'furious', 'rage', 'hate them', 'revenge', 'livid', 'pissed'], encour: "It is okay to feel angry, but do not let it poison your spirit. God invites you to bring this raw anger to Him, asking Him to bring true justice and soften your heart.", verse: { ref: "Ephesians 4:26", txt: "In your anger do not sin: Do not let the sun go down while you are still angry." } },
+                { cat: "bitterness", kw: ['forgive', 'bitter', 'resent', 'grudge', 'holding on'], encour: "Holding onto this hurt feels like protection, but it's actually a cage. God offers you the strength to release them, just as He has forgiven you.", verse: { ref: "Ephesians 4:32", txt: "Be kind and compassionate to one another, forgiving each other, just as in Christ God forgave you." } },
+                { cat: "grief", kw: ['grief', 'loss', 'died', 'miss', 'passed away', 'widow', 'mourn', 'funeral', 'miscarriage', 'death'], encour: "God does not ask you to hide your tears or rush your healing. He is intimately, physically close to you in this crushing heartbreak.", verse: { ref: "Psalm 34:18", txt: "The Lord is close to the brokenhearted and saves those who are crushed in spirit." } },
+                { cat: "exhaustion", kw: ['exhausted', 'tired', 'burnout', 'fatigue', 'weary', 'drained', 'no sleep', 'long day'], encour: "You are running on empty and striving too hard. Jesus invites you to drop the heavy yoke of performance and simply rest in His presence.", verse: { ref: "Matthew 11:28", txt: "Come to me, all you who are weary and burdened, and I will give you rest." } },
+                { cat: "guilt", kw: ['shame', 'guilt', 'unforgivable', 'regret'], encour: "Do not let shame keep you hiding in the shadows. When we confess our mess to Him, God doesn't shame us—He cleanses us.", verse: { ref: "1 John 1:9", txt: "If we confess our sins, he is faithful and just and will forgive us." } },
+                { cat: "loneliness", kw: ['lonel', 'alone', 'isolat', 'no friends', 'no one cares', 'left out'], encour: "Even when you feel entirely unseen by the world, you are intimately known, fiercely protected, and deeply loved by your Creator.", verse: { ref: "Deuteronomy 31:8", txt: "The Lord himself goes before you and will be with you; he will never leave you." } },
+                { cat: "financial", kw: ['money', 'bill', 'debt', 'broke', 'rent', 'mortgage', 'groceries', 'bank', 'afford', 'inflation'], encour: "The anxiety of providing is heavy, but God sees your practical, earthly needs. He promises to be your ultimate provider in His perfect timing.", verse: { ref: "Philippians 4:19", txt: "And my God will meet all your needs according to the riches of his glory." } },
+                { cat: "future", kw: ['future', 'scared', 'fear', 'unknown', 'tomorrow', 'next step'], encour: "The unknown can be terrifying, but God is already standing in your tomorrow. You do not have to walk into the future alone.", verse: { ref: "Joshua 1:9", txt: "Be strong and courageous. Do not be afraid... for the Lord your God will be with you wherever you go." } },
+                { cat: "depression", kw: ['depress', 'hopeless', 'sad', 'dark', 'heavy', 'crying', 'give up'], encour: "In this heavy, suffocating darkness, God promises to be near. You don't have to have the strength right now; let Him carry you until the light returns.", verse: { ref: "Lamentations 3:22", txt: "Because of the Lord’s great love we are not consumed, for his compassions never fail." } }
+            ];
+
+            const match = wisdomLibrary.find(item => item.kw.some(k => t.includes(k)));
+            
+            // Basic Crisis Detection
+            const crisisWords = ['suicide', 'kill myself', 'end it all', 'want to die', 'abuse', 'hit me', 'hurt myself'];
+            const isCrisis = crisisWords.some(k => t.includes(k));
+
+            if (match) {
+                return {
+                    keywords: match.cat,
+                    encouragement: match.encour,
+                    localVerse: { reference: match.verse.ref, text: match.verse.txt },
+                    isCrisis: isCrisis
+                };
+            } else {
+                return { 
+                    keywords: "peace",
+                    encouragement: "God sees your heart in this moment. Even when words fail, He provides a peace that transcends understanding.", 
+                    localVerse: { reference: "John 14:27", text: "Peace I leave with you; my peace I give you. Do not let your hearts be troubled." },
+                    isCrisis: isCrisis
+                };
+            }
+        };
+
+        const fetchVerses = async (keywords, localVerse) => {
+            await new Promise(resolve => setTimeout(resolve, 600)); // Smooth UI transition
+            return localVerse ? [localVerse] : [{ reference: "John 14:27", text: "Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid." }];
+        };
+
+        const commonStruggles = ['Anxiety', 'Loneliness', 'Anger', 'Parenting', 'Work', 'Temptation'];
+
+        function LandingPage({ onUnlock, themeProps }) {
+            const [name, setName] = useState("");
+            const [email, setEmail] = useState("");
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState("");
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setIsLoading(true);
+                setError("");
+
+                const googleFormActionUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfCs-OeX_8bXAcZrGgUxe1xNrtGfBqQDig19HbADFuLIK6KXw/formResponse";
+                const nameEntryId = "entry.1180825318";
+                const emailEntryId = "entry.471842347";
+
+                try {
+                    if (googleFormActionUrl) {
+                        const formData = new FormData();
+                        formData.append(nameEntryId, name);
+                        formData.append(emailEntryId, email);
+
+                        await fetch(googleFormActionUrl, {
+                            method: "POST",
+                            mode: "no-cors",
+                            body: formData
+                        });
+                    } else {
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                    
+                    onUnlock(name);
+                } catch (err) {
+                    setError("There was an issue connecting. Please try again.");
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-brand-light dark:bg-brand-dark flex flex-col md:flex-row fade-in transition-colors duration-300">
+                    
+                    {/* Theme Toggle Absolute Position for Landing */}
+                    <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50">
+                        <ThemeToggle {...themeProps} />
+                    </div>
+
+                    {/* Left Side: Value Proposition */}
+                    <div className="w-full md:w-1/2 p-8 md:p-16 lg:p-24 flex flex-col justify-center border-r border-stone-200/50 dark:border-teal-800/50 bg-stone-50/50 dark:bg-[#0b534d]/30">
+                        <div className="max-w-md mx-auto md:mx-0">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="bg-teal-50 dark:bg-[#115e59] p-2.5 rounded-xl text-teal-600 dark:text-brand-sage shadow-sm border border-teal-100/50 dark:border-teal-700/50">
+                                    <Sparkles className="w-6 h-6" />
+                                </div>
+                                <h1 className="text-2xl font-serif font-bold text-stone-800 dark:text-brand-light tracking-tight">The Renewing</h1>
+                            </div>
+                            
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-stone-900 dark:text-brand-light leading-tight mb-6">
+                                Transform Your Mind.<br/>Renew Your Spirit.
+                            </h2>
+                            <p className="text-stone-600 dark:text-brand-sage/80 text-lg leading-relaxed mb-10">
+                                A private, digital space to surrender your heavy thoughts and meet them with the exact truth of God's Word.
+                            </p>
+
+                            <div className="space-y-6">
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1 bg-white dark:bg-[#115e59] p-2 rounded-lg border border-stone-200 dark:border-teal-700 shadow-sm"><BookOpen className="w-5 h-5 text-teal-600 dark:text-brand-sage"/></div>
+                                    <div>
+                                        <h3 className="font-semibold text-stone-800 dark:text-brand-light">Contextual Scripture</h3>
+                                        <p className="text-stone-500 dark:text-brand-sage/70 text-sm mt-1">Our Wisdom Engine analyzes your struggle and finds the specific verse you need to hear today.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1 bg-white dark:bg-[#115e59] p-2 rounded-lg border border-stone-200 dark:border-teal-700 shadow-sm"><ShieldCheck className="w-5 h-5 text-teal-600 dark:text-brand-sage"/></div>
+                                    <div>
+                                        <h3 className="font-semibold text-stone-800 dark:text-brand-light">100% Private</h3>
+                                        <p className="text-stone-500 dark:text-brand-sage/70 text-sm mt-1">No databases. Your journal entries are saved entirely locally on your own device.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1 bg-white dark:bg-[#115e59] p-2 rounded-lg border border-stone-200 dark:border-teal-700 shadow-sm"><Mic className="w-5 h-5 text-teal-600 dark:text-brand-sage"/></div>
+                                    <div>
+                                        <h3 className="font-semibold text-stone-800 dark:text-brand-light">Voice to Text</h3>
+                                        <p className="text-stone-500 dark:text-brand-sage/70 text-sm mt-1">Too overwhelmed to type? Just hit the microphone and speak your burdens freely.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Side: Signup Form */}
+                    <div className="w-full md:w-1/2 p-8 md:p-16 lg:p-24 flex items-center justify-center bg-white dark:bg-brand-dark">
+                        <div className="max-w-md w-full">
+                            <div className="bg-brand-light dark:bg-[#0b534d] p-8 md:p-10 rounded-[2rem] border border-stone-200 dark:border-teal-700 shadow-xl shadow-stone-200/50 dark:shadow-teal-900/50 transition-colors duration-300">
+                                <div className="w-12 h-12 bg-teal-100 dark:bg-[#115e59] rounded-full flex items-center justify-center mb-6 text-teal-700 dark:text-brand-sage mx-auto">
+                                    <Lock className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-2xl font-serif font-bold text-center text-stone-800 dark:text-brand-light mb-2">Unlock Your Journal</h3>
+                                <p className="text-center text-stone-500 dark:text-brand-sage/80 text-sm mb-8">Enter your details below to access this free tool instantly.</p>
+                                
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div>
+                                        <label className="block text-xs font-bold text-stone-500 dark:text-brand-sage/60 uppercase tracking-wider mb-2">First Name</label>
+                                        <input 
+                                            type="text" 
+                                            required
+                                            value={name}
+                                            onChange={e => setName(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-teal-600 bg-white dark:bg-[#0d655e] text-stone-800 dark:text-white placeholder-stone-400 dark:placeholder-teal-200/50 focus:ring-2 focus:ring-teal-500 dark:focus:ring-brand-sage focus:border-transparent outline-none transition-all"
+                                            placeholder="John"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-stone-500 dark:text-brand-sage/60 uppercase tracking-wider mb-2">Email Address</label>
+                                        <input 
+                                            type="email" 
+                                            required
+                                            value={email}
+                                            onChange={e => setEmail(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-teal-600 bg-white dark:bg-[#0d655e] text-stone-800 dark:text-white placeholder-stone-400 dark:placeholder-teal-200/50 focus:ring-2 focus:ring-teal-500 dark:focus:ring-brand-sage focus:border-transparent outline-none transition-all"
+                                            placeholder="john@example.com"
+                                        />
+                                    </div>
+                                    
+                                    {error && <p className="text-rose-600 dark:text-rose-400 text-sm font-medium text-center">{error}</p>}
+
+                                    <button 
+                                        type="submit" 
+                                        disabled={isLoading}
+                                        className="w-full bg-teal-700 dark:bg-brand-light text-white dark:text-brand-dark font-semibold py-3.5 rounded-xl hover:bg-teal-800 dark:hover:bg-gray-100 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
+                                    >
+                                        {isLoading ? <Loader2 className="w-5 h-5" /> : "Access Journal Now"}
+                                    </button>
+                                </form>
+                                <p className="text-center text-[10px] text-stone-400 dark:text-brand-sage/50 mt-6">By signing up, you agree to receive encouraging updates. We respect your inbox and never sell your data.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function JournalApp({ userName, themeProps }) {
+            const [entries, setEntries] = useState(() => {
+                try {
+                    const saved = localStorage.getItem('renewing-entries');
+                    return saved ? JSON.parse(saved) : [];
+                } catch (e) {
+                    console.error("Local storage access denied or quota exceeded.", e);
+                    return [];
+                }
+            });
+            
+            const [inputText, setInputText] = useState("");
+            const [isRecording, setIsRecording] = useState(false);
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [editingId, setEditingId] = useState(null);
+
+            const recognitionRef = useRef(null);
+
+            useEffect(() => {
+                try {
+                    localStorage.setItem('renewing-entries', JSON.stringify(entries));
+                } catch (error) {
+                    console.error("Failed to save to local storage:", error);
+                }
+            }, [entries]);
+
+            useEffect(() => {
+                if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    recognitionRef.current = new SpeechRecognition();
+                    recognitionRef.current.continuous = true;
+                    recognitionRef.current.interimResults = true;
+
+                    recognitionRef.current.onresult = (event) => {
+                        let finalTranscript = '';
+                        for (let i = event.resultIndex; i < event.results.length; ++i) {
+                            if (event.results[i].isFinal) {
+                                finalTranscript += event.results[i][0].transcript + ' ';
+                            }
+                        }
+                        if (finalTranscript) {
+                            setInputText((prev) => prev + finalTranscript);
+                        }
+                    };
+
+                    recognitionRef.current.onstart = () => setIsRecording(true);
+                    recognitionRef.current.onerror = (e) => {
+                        console.error("Speech Recognition Error:", e);
+                        setIsRecording(false);
+                    };
+                    recognitionRef.current.onend = () => setIsRecording(false);
+                }
+            }, []);
+
+            const toggleRecording = () => {
+                if (!recognitionRef.current) return alert("Speech recognition not supported in this browser.");
+                
+                if (isRecording) {
+                    recognitionRef.current.stop();
+                    setIsRecording(false);
+                } else {
+                    try {
+                        recognitionRef.current.start();
+                        setIsRecording(true);
+                    } catch(err) {
+                        console.error("Failed to start speech recognition", err);
+                        setIsRecording(false);
+                    }
+                }
+            };
+
+            const saveEntry = async () => {
+                if (!inputText.trim()) return;
+                setIsProcessing(true);
+
+                try {
+                    const analysis = extractKeywordLocally(inputText);
+                    const verses = await fetchVerses(analysis.keywords, analysis.localVerse);
+                    
+                    const generateId = () => {
+                        if (window.crypto && window.crypto.randomUUID) {
+                            return window.crypto.randomUUID();
+                        }
+                        return Date.now().toString(36) + Math.random().toString(36).substring(2);
+                    };
+
+                    const newEntry = {
+                        id: editingId || generateId(),
+                        text: inputText,
+                        keywords: analysis.keywords,
+                        encouragement: analysis.encouragement,
+                        isCrisis: analysis.isCrisis,
+                        verses,
+                        timestamp: Date.now(),
+                    };
+
+                    if (editingId) {
+                        setEntries(prev => prev.map(e => e.id === editingId ? newEntry : e));
+                    } else {
+                        setEntries(prev => [newEntry, ...prev]);
+                    }
+
+                    setInputText("");
+                    setEditingId(null);
+                } catch (error) {
+                    console.error("Save Entry Error:", error);
+                    alert("There was an issue processing your entry. Please try again.");
+                } finally {
+                    setIsProcessing(false);
+                }
+            };
+
+            const handleEdit = (entry) => {
+                setInputText(entry.text);
+                setEditingId(entry.id);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleDelete = (entryId) => {
+                if(window.confirm("Are you sure you want to delete this reflection?")) {
+                    setEntries(prev => prev.filter(e => e.id !== entryId));
+                    if (editingId === entryId) {
+                        setEditingId(null);
+                        setInputText("");
+                    }
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-brand-light dark:bg-brand-dark text-stone-800 dark:text-brand-light font-sans selection:bg-teal-100 dark:selection:bg-teal-700 selection:text-teal-900 dark:selection:text-brand-light pb-20 fade-in transition-colors duration-300">
+                    <header className="sticky top-0 z-50 bg-white/90 dark:bg-brand-dark/90 backdrop-blur-md border-b border-stone-200/60 dark:border-teal-800/80 shadow-sm transition-colors duration-300">
+                        <div className="max-w-4xl mx-auto px-4 py-3 md:py-4">
+                            <div className="flex flex-row justify-between items-center gap-3">
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <div className="bg-teal-50 dark:bg-teal-900/50 p-1.5 md:p-2 rounded-xl text-teal-600 dark:text-brand-sage">
+                                        <Sparkles className="w-5 h-5 md:w-6 md:h-6" />
+                                    </div>
+                                    <h1 className="text-xl md:text-3xl font-serif font-semibold text-stone-800 dark:text-brand-light tracking-tight">The Renewing</h1>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-stone-500 dark:text-brand-sage/80 bg-stone-100 dark:bg-teal-900/50 px-3 py-1.5 rounded-full border border-stone-200/50 dark:border-teal-700/50">
+                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                        <span className="hidden sm:inline">Private & Local</span>
+                                        <span className="sm:hidden">Local</span>
+                                    </div>
+                                    <ThemeToggle {...themeProps} />
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-4xl mx-auto px-4 py-6 md:py-10">
+                        <div className="text-center max-w-2xl mx-auto mb-6 md:mb-8">
+                            <p className="text-stone-500 dark:text-brand-sage/90 font-serif text-base md:text-xl leading-relaxed italic px-2">
+                                "Do not conform to the pattern of this world, but be transformed by the renewing of your mind..."
+                            </p>
+                            <p className="text-stone-400 dark:text-brand-sage/60 text-xs md:text-sm mt-2 font-medium tracking-widest uppercase">Romans 12:2</p>
+                        </div>
+
+                        <section className="bg-white dark:bg-[#0b534d] rounded-[1.5rem] md:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-teal-900/20 border border-stone-100 dark:border-teal-700/50 p-5 md:p-8 mb-10 md:mb-12 transition-colors duration-300">
+                            <h2 className="text-xl md:text-2xl font-serif font-semibold mb-1.5 md:mb-2 text-stone-800 dark:text-brand-light">
+                                {editingId ? "Refine Your Reflection" : (userName ? `${userName}, Cast Your Cares` : "Cast Your Cares")}
+                            </h2>
+                            <p className="text-stone-500 dark:text-brand-sage/80 text-sm md:text-base mb-5 md:mb-6 leading-relaxed">
+                                Take a deep breath. Type or speak the negative or anxious thoughts you need to surrender today.
+                            </p>
+                            <div className="relative group">
+                                <textarea
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    placeholder="Lord, today I am feeling..."
+                                    className="w-full h-36 md:h-44 p-4 md:p-5 bg-[#FAFAF9] dark:bg-[#0d655e] border border-stone-200 dark:border-teal-600 rounded-2xl focus:ring-4 focus:ring-teal-50 dark:focus:ring-teal-800 focus:border-teal-300 dark:focus:border-brand-sage focus:bg-white dark:focus:bg-[#115e59] resize-none transition-all duration-300 text-stone-700 dark:text-white placeholder-stone-400 dark:placeholder-teal-100/50 text-base md:text-lg leading-relaxed shadow-inner"
+                                />
+                                <div className="absolute bottom-3 right-3 flex gap-2">
+                                    <button onClick={toggleRecording} className={`p-2.5 md:p-3 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm ${isRecording ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-300 animate-pulse ring-4 ring-rose-50 dark:ring-rose-900/30' : 'bg-white dark:bg-[#115e59] text-stone-400 dark:text-brand-sage/70 hover:text-teal-600 dark:hover:text-brand-light hover:bg-teal-50 dark:hover:bg-teal-700 border border-stone-100 dark:border-teal-600/50'}`}>
+                                        {isRecording ? <MicOff className="w-5 h-5 md:w-6 md:h-6" /> : <Mic className="w-5 h-5 md:w-6 md:h-6" />}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="mt-4 md:mt-5 flex flex-col sm:flex-row sm:items-center gap-2">
+                                <span className="text-xs text-stone-400 dark:text-brand-sage/60 font-semibold uppercase tracking-wider pr-1">Quick start:</span>
+                                <div className="flex flex-wrap gap-2">
+                                    {commonStruggles.map(struggle => (
+                                        <button key={struggle} onClick={() => setInputText(`Lord, today I am struggling with ${struggle.toLowerCase()}... `)} className="text-xs md:text-sm bg-stone-50 dark:bg-teal-900/40 hover:bg-teal-50 dark:hover:bg-teal-700/60 active:bg-teal-100 dark:active:bg-teal-600 hover:text-teal-700 dark:hover:text-brand-light text-stone-600 dark:text-brand-sage/90 px-3 md:px-4 py-1.5 md:py-2 rounded-full transition-all duration-300 border border-stone-200 dark:border-teal-700/50">
+                                            {struggle}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="mt-6 md:mt-8 flex flex-col sm:flex-row justify-end gap-3 md:gap-4">
+                                {editingId && (
+                                    <button onClick={() => {setEditingId(null); setInputText("");}} className="w-full sm:w-auto px-5 py-3 md:py-2.5 text-stone-500 dark:text-brand-sage/80 bg-stone-50 dark:bg-teal-900/40 hover:text-stone-800 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-teal-800 rounded-full transition-all font-medium text-sm md:text-base border border-transparent dark:border-teal-700/50">
+                                        Cancel Edit
+                                    </button>
+                                )}
+                                <button onClick={saveEntry} disabled={!inputText.trim() || isProcessing} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-teal-700 dark:bg-brand-light text-white dark:text-brand-dark px-6 md:px-8 py-3.5 md:py-3 rounded-full font-semibold hover:bg-teal-800 dark:hover:bg-gray-100 hover:shadow-md disabled:opacity-50 transition-all duration-300 text-sm md:text-base">
+                                    {isProcessing ? <><Loader2 className="w-4 h-4 md:w-5 md:h-5" />Seeking Truth...</> : <><Wind className="w-4 h-4 md:w-5 md:h-5" />{editingId ? "Update Reflection" : "Reflect & Renew"}</>}
+                                </button>
+                            </div>
+                        </section>
+
+                        <section>
+                            <div className="flex items-center gap-2.5 mb-6 px-1 md:px-2">
+                                <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-teal-600 dark:text-brand-sage" />
+                                <h2 className="text-xl md:text-2xl font-serif font-semibold text-stone-800 dark:text-brand-light">{userName ? `${userName}'s Journey` : "Your Journey"}</h2>
+                            </div>
+                            {entries.length === 0 ? (
+                                <div className="text-center py-12 md:py-16 bg-white dark:bg-[#0b534d] rounded-3xl border border-stone-200 dark:border-teal-700/50 border-dashed shadow-sm mx-1 transition-colors duration-300">
+                                    <div className="bg-stone-50 dark:bg-teal-900/50 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Wind className="w-6 h-6 md:w-8 md:h-8 text-stone-300 dark:text-teal-600" />
+                                    </div>
+                                    <p className="text-stone-500 dark:text-brand-sage/90 text-base md:text-lg font-medium px-4">Your journal is quietly waiting.</p>
+                                    <p className="text-stone-400 dark:text-brand-sage/60 mt-2 text-xs md:text-sm px-4">Entries save automatically and securely to this device.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6 md:space-y-8">
+                                    {entries.map(entry => (
+                                        <div key={entry.id} className="bg-white dark:bg-[#0b534d] rounded-3xl shadow-sm border border-stone-100 dark:border-teal-700/50 overflow-hidden group/card relative transition-colors duration-300">
+                                            <div className="p-5 md:p-8">
+                                                <div className="flex justify-between items-start mb-5 md:mb-6">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3">
+                                                        <span className="text-xs md:text-sm font-medium text-stone-400 dark:text-brand-sage/60 tracking-wide">
+                                                            {new Date(entry.timestamp).toLocaleDateString('en-US', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}
+                                                        </span>
+                                                        {entry.keywords && (
+                                                            <span className="w-fit bg-teal-50 dark:bg-teal-900/50 text-teal-700 dark:text-brand-sage text-[10px] md:text-xs px-2.5 py-1 rounded-full uppercase tracking-widest font-semibold border border-teal-100/50 dark:border-teal-700/50">
+                                                                {entry.keywords}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex gap-1 md:gap-2">
+                                                        <button onClick={() => handleEdit(entry)} className="p-2 text-stone-400 dark:text-brand-sage/60 hover:text-teal-600 dark:hover:text-brand-light hover:bg-teal-50 dark:hover:bg-teal-700/50 active:bg-teal-100 dark:active:bg-teal-600 rounded-full transition-colors"><Edit2 className="w-4 h-4" /></button>
+                                                        <button onClick={() => handleDelete(entry.id)} className="p-2 text-stone-400 dark:text-brand-sage/60 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 active:bg-rose-100 dark:active:bg-rose-800/50 rounded-full transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                    </div>
+                                                </div>
+                                                {entry.isCrisis && (
+                                                    <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/50 p-4 md:p-5 mb-5 md:mb-6 rounded-2xl flex flex-col sm:flex-row gap-3 md:gap-4 items-start">
+                                                        <div className="bg-rose-100 dark:bg-rose-900/50 p-2 rounded-full flex-shrink-0 hidden sm:block"><Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" /></div>
+                                                        <div>
+                                                            <h4 className="text-sm md:text-base font-semibold text-rose-900 dark:text-rose-100 mb-1 flex items-center gap-2">You are deeply loved.</h4>
+                                                            <p className="text-xs md:text-sm text-rose-700 dark:text-rose-200/80 leading-relaxed">Your life has profound, God-given purpose. If you are in deep distress, please call or text <strong className="font-bold underline">988</strong> immediately to reach the Suicide & Crisis Lifeline.</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div className="mb-6 md:mb-8 pl-3 md:pl-4 border-l-2 border-stone-200 dark:border-teal-700/50">
+                                                    <h4 className="text-[10px] md:text-[11px] font-bold text-stone-400 dark:text-brand-sage/50 uppercase tracking-widest mb-2 md:mb-3">The Burden</h4>
+                                                    <p className="text-stone-500 dark:text-brand-sage/90 whitespace-pre-wrap leading-relaxed text-base md:text-lg italic">"{entry.text}"</p>
+                                                </div>
+                                                {entry.verses && entry.verses.length > 0 && (
+                                                    <div className="bg-[#F8FBFA] dark:bg-[#0d655e] border border-teal-100/60 dark:border-teal-700/80 p-5 md:p-8 rounded-2xl md:rounded-3xl transition-colors duration-300">
+                                                        <h4 className="text-[10px] md:text-[11px] font-bold text-teal-600 dark:text-brand-sage uppercase tracking-widest mb-3 md:mb-4 flex items-center gap-2">
+                                                            <Sparkles className="w-3 h-3 md:w-4 md:h-4" /> The Truth
+                                                        </h4>
+                                                        {entry.encouragement && (
+                                                            <p className="text-teal-900 dark:text-white font-medium mb-5 md:mb-6 pb-5 md:pb-6 border-b border-teal-100/50 dark:border-teal-700/60 leading-relaxed text-sm md:text-base">{entry.encouragement}</p>
+                                                        )}
+                                                        <div className="space-y-4 md:space-y-6">
+                                                            {entry.verses.map((verse, idx) => (
+                                                                <div key={idx} className="bg-white dark:bg-[#115e59] p-4 md:p-6 rounded-xl md:rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] dark:shadow-teal-900/30 border border-teal-50 dark:border-teal-700/50 transition-colors duration-300">
+                                                                    <p className="text-stone-800 dark:text-brand-light font-serif text-base md:text-xl leading-relaxed mb-3 md:mb-4 text-pretty">"{verse.text}"</p>
+                                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-2">
+                                                                        <p className="text-teal-700 dark:text-brand-sage font-semibold tracking-wide text-sm md:text-base">— {verse.reference}</p>
+                                                                        <a href={`https://www.bible.com/search/bible?q=${encodeURIComponent(verse.reference)}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 text-xs text-teal-600 dark:text-brand-dark hover:text-teal-800 dark:hover:text-brand-dark/80 font-bold transition-all bg-teal-50/50 dark:bg-brand-sage border border-teal-100 dark:border-brand-sage active:bg-teal-100 dark:active:bg-brand-sage/80 px-4 py-2 rounded-full w-full sm:w-auto">
+                                                                            Read Chapter <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    </main>
+                </div>
+            );
+        }
+
+        function App() {
+            const { theme, toggleTheme } = useTheme();
+            const themeProps = { theme, toggleTheme };
+
+            const [isUnlocked, setIsUnlocked] = useState(() => {
+                try { return localStorage.getItem('renewing-unlocked') === 'true'; }
+                catch (e) { return false; }
+            });
+            const [userName, setUserName] = useState(() => {
+                try { return localStorage.getItem('renewing-username') || ""; }
+                catch (e) { return ""; }
+            });
+
+            const handleUnlock = (name) => {
+                try {
+                    localStorage.setItem('renewing-unlocked', 'true');
+                    if(name) {
+                        localStorage.setItem('renewing-username', name);
+                        setUserName(name);
+                    }
+                } catch (error) {
+                    console.error("Local storage error:", error);
+                }
+                setIsUnlocked(true);
+            };
+
+            if (!isUnlocked) {
+                return <LandingPage onUnlock={handleUnlock} themeProps={themeProps} />;
+            }
+
+            return <JournalApp userName={userName} themeProps={themeProps} />;
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
